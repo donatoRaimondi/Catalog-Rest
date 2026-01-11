@@ -1,7 +1,9 @@
 package com.example.catalog.web.controller;
 
 import com.example.catalog.api.dto.ProductDto;
-import com.example.catalog.service.ProductService;
+import com.example.catalog.web.dto.CreateProductRequest;
+import com.example.catalog.web.service.ProductDbService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,9 +13,9 @@ import java.util.List;
 @RequestMapping("/api/products")
 public class ProductController {
 
-  private final ProductService productService;
+  private final ProductDbService productService;
 
-  public ProductController(ProductService productService) {
+  public ProductController(ProductDbService productService) {
     this.productService = productService;
   }
 
@@ -24,11 +26,14 @@ public class ProductController {
 
   @GetMapping("/{id}")
   public ResponseEntity<ProductDto> getById(@PathVariable("id") String id) {
-    return productService.listActive().stream()
-      .filter(p -> p.id().equals(id))
-      .findFirst()
-      .map(ResponseEntity::ok)
-      .orElseGet(() -> ResponseEntity.notFound().build());
+    return productService.getById(id)
+        .map(ResponseEntity::ok)
+        .orElseGet(() -> ResponseEntity.notFound().build());
+  }
+
+  @PostMapping
+  public ProductDto create(@Valid @RequestBody CreateProductRequest req) {
+    return productService.create(req.name());
   }
 }
 
