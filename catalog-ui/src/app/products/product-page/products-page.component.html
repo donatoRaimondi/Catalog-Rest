@@ -1,0 +1,39 @@
+<h2>Catalog</h2>
+
+<div style="display:flex; gap:8px; align-items:center; margin: 8px 0;">
+  <input
+    type="text"
+    placeholder="Nome prodotto"
+    [(ngModel)]="name"
+    (keyup.enter)="add()"
+    [disabled]="adding"
+    style="min-width: 240px;"
+  />
+
+  <button (click)="add()" [disabled]="adding || !name.trim()">
+    {{ adding ? 'Adding...' : 'Aggiungi' }}
+  </button>
+
+  <button (click)="refresh()" [disabled]="loading">
+    {{ loading ? 'Loading...' : 'Refresh' }}
+  </button>
+</div>
+
+<div *ngIf="addError" style="color: #b00020; margin-bottom: 8px;">
+  Errore creazione prodotto: {{ addError }}
+</div>
+
+<div *ngIf="loadError" style="color: #b00020; margin-bottom: 8px;">
+  Errore nel caricamento prodotti: {{ loadError }}
+</div>
+
+<div *ngIf="!loading && products.length === 0">
+  Nessun prodotto.
+</div>
+
+<ul>
+  <li *ngFor="let p of products; trackBy: trackById">
+    <strong>{{ p.name }}</strong>
+    <span style="opacity:0.7;">(id={{ p.id }}, active={{ p.active }})</span>
+  </li>
+</ul>
