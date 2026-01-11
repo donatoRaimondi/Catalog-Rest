@@ -1,8 +1,6 @@
-# Catalog
-
 # Catalog – Enterprise Java REST (Maven Multi‑Module)
 
-**Progetto dimostrativo orientato al CV** che mostra competenze su Maven multi‑modulo, Spring Boot REST, testing e buone pratiche di build.
+**Progetto dimostrativo orientato al CV** che mostra competenze su Maven multi‑modulo, Spring Boot REST, JPA, Flyway e integrazione con PostgreSQL.
 
 ---
 
@@ -13,8 +11,9 @@ Dimostrare capacità reali su:
 * Maven come orchestratore di build (multi‑modulo)
 * Architettura a moduli riusabili
 * API REST con Spring Boot
+* Persistenza con JPA + PostgreSQL
+* Migrazioni DB con Flyway
 * Testing e qualità di build
-* Avvio e gestione applicazione da root
 
 ---
 
@@ -25,16 +24,13 @@ catalog/
   pom.xml                # Parent (packaging pom)
   catalog-api/           # DTO e contratti condivisi
   catalog-service/       # Business logic
-  catalog-app/           # Console app di test
   catalog-web/           # Spring Boot REST API
 ```
 
 Relazioni:
 
 ```
-catalog-api  <-  catalog-service  <-  catalog-app
-                          |
-                          +--------<- catalog-web
+catalog-api  <-  catalog-service  <-  catalog-web
 ```
 
 ---
@@ -44,9 +40,10 @@ catalog-api  <-  catalog-service  <-  catalog-app
 * **Java 21 (LTS)**
 * **Maven 3.9+**
 * **Spring Boot 3.4.x**
-* Spring Web, Validation
+* Spring Web, Spring Data JPA, Validation
+* PostgreSQL 16+
+* Flyway
 * JUnit 5, Spring Boot Test
-* Tomcat embedded
 
 ---
 
@@ -57,30 +54,31 @@ catalog-api  <-  catalog-service  <-  catalog-app
 * Progetto **multi‑modulo Maven** con parent POM
 * Gestione centralizzata di:
 
-  * versioni dipendenze (BOM)
-  * versioni plugin (pluginManagement)
+  * versioni dipendenze (BOM Spring Boot)
+  * versioni plugin
 * Build riproducibile con reactor Maven
 * Supporto a esecuzione da root con `-pl` e `-am`
 
 ### API REST
 
-* Endpoint REST:
+Endpoint:
 
-  * `GET /api/products`
-  * `GET /api/products/{id}`
-  * `POST /api/products`
+* `GET /api/products`
+* `GET /api/products/{id}`
+* `POST /api/products`
+
+Funzionalità:
+
 * Serializzazione JSON automatica
 * Validazione input con Bean Validation
+* Mapping Entity → DTO
 
-### Error Handling
+### Persistenza
 
-* Gestione centralizzata errori con `@ControllerAdvice`
-* Risposte strutturate:
-
-  * `400` bad request
-  * `422` validation error
-  * `404` not found
-  * `500` internal error
+* PostgreSQL come database
+* JPA/Hibernate
+* Flyway per versionamento schema
+* Entità: `products (id, name, active)`
 
 ### Testing
 
@@ -91,14 +89,32 @@ catalog-api  <-  catalog-service  <-  catalog-app
 
 ## ▶️ Avvio Applicazione
 
+### Prerequisiti
+
+* PostgreSQL in esecuzione su `localhost:5432`
+* Database: `catalog`
+* Utente: `catalog`
+* Password configurata in `application.yml`
+
+Esempio schema:
+
+```
+products(
+  id varchar(50) primary key,
+  name varchar(255) not null,
+  active boolean not null default true
+)
+```
+
+### Build
+
 Dalla root del progetto:
 
 ```bash
 mvn clean test
-mvn -pl ./catalog-web spring-boot:run
 ```
 
-Con ricostruzione automatica moduli dipendenti:
+### Avvio REST API
 
 ```bash
 mvn -pl ./catalog-web -am spring-boot:run
@@ -107,7 +123,8 @@ mvn -pl ./catalog-web -am spring-boot:run
 Cambio porta:
 
 ```bash
-mvn -pl ./catalog-web spring-boot:run -Dspring-boot.run.arguments=--server.port=8081
+mvn -pl ./catalog-web spring-boot:run \
+  -Dspring-boot.run.arguments=--server.port=8081
 ```
 
 ---
@@ -116,7 +133,9 @@ mvn -pl ./catalog-web spring-boot:run -Dspring-boot.run.arguments=--server.port=
 
 ```bash
 curl http://localhost:8080/api/products
-curl http://localhost:8080/api/products/1
+
+curl http://localhost:8080/api/products/0
+
 curl -X POST http://localhost:8080/api/products \
   -H "Content-Type: application/json" \
   -d '{"name":"Monitor"}'
@@ -127,10 +146,11 @@ curl -X POST http://localhost:8080/api/products \
 ## 🧠 Competenze Dimostrate
 
 * Progettazione Maven multi‑modulo
-* Gestione dipendenze e plugin in modo enterprise
+* Gestione dipendenze e plugin in modo strutturato
 * Costruzione API REST con Spring Boot
 * Dependency Injection e configurazione bean
-* Validazione e gestione errori centralizzata
+* JPA + PostgreSQL
+* Flyway per migrazioni DB
 * Testing automatico integrato nella build
 * Avvio applicazioni da root con orchestrazione Maven
 
@@ -138,11 +158,12 @@ curl -X POST http://localhost:8080/api/products \
 
 ## 📈 Prossimi Step (Roadmap)
 
-* Persistenza con PostgreSQL
-* JPA + Flyway
-* Testcontainers
-* Sicurezza JWT
-* Observability (metrics, health, tracing)
+* Autenticazione e ruoli
+* Migliorare copertura test
+* Docker compose completo
+* CI con GitHub Actions
+* Metriche e health check
 
-Questo progetto rappresenta una base solida per sviluppo enterprise Java.
-Breve progetto di dimostrazione di utilizzo Java, Maven e Spring Boot 
+---
+
+Questo progetto rappresenta una base solida per sviluppo Java backend in contesto enterprise, con focus su build, architettura modulare e integrazione reale con database.
